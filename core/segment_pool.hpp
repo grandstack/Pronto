@@ -1,9 +1,11 @@
 #ifndef pronto_segment_pool_header
 #define pronto_segment_pool_header
 
+#include "segment_context.hpp"
 #include "entity.hpp"
 #include "bag.hpp"
 
+#include <functional>
 #include <utility>
 #include <memory>
 #include <vector>
@@ -16,13 +18,13 @@ namespace pronto
 	template <typename Segment, typename ... Segments>
 	struct segment_pool <entity<Segments ... >, Segment>
 	{
-		using aligned_type = std::aligned_storage_t<sizeof(Segment), alignof(Segment)>;
-		using deleter_type = std::unique_ptr<Segment>;
-
 		using value_type = Segment;
 
-		void create(entity<Segments ... >);
-		void create(bag<entity<Segments ... >> const &);
+		template <typename ... Parameters>
+		void create(entity<Segments ... >, Parameters const & ... );
+
+		template <typename ... Parameters>
+		void create(bag<entity<Segments ... >> const &, Parameters const & ...);
 
 		void destroy(entity<Segments ... >);
 		void destroy(bag<entity<Segments ... >> const &);
@@ -33,12 +35,7 @@ namespace pronto
 		
 	private:
 
-		std::vector<deleter_type> deleters
-		{
-			// ...
-		};
-
-		std::vector<aligned_type> segments
+		std::vector<Segment> segments
 		{
 			// ...
 		};

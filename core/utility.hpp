@@ -35,8 +35,6 @@ namespace pronto
 			};
 		}
 
-		// Bad 'SFINAE' so I'm only prioritizing functors at this point ...
-
 		template <typename Type>
 		using parameters_t = typename detail::parameters<decltype(&Type::operator ())>::type;
 

@@ -18,8 +18,6 @@ namespace pronto
 			inline void inflate_entity(entity<Segments ... > object)
 			{
 				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
-				
-				auto lock = make_spinlock<entity<Segments ... >>();
 				pool.create(object);
 			}
 
@@ -34,8 +32,6 @@ namespace pronto
 			inline void inflate_entity(bag<entity<Segments ... >> const & container)
 			{
 				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
-
-				auto lock = make_spinlock <entity<Segments ... >>();
 				pool.create(container);
 			}
 
@@ -52,8 +48,6 @@ namespace pronto
 			inline void deflate_entity(entity<Segments ... > object)
 			{
 				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
-
-				auto lock = make_spinlock<entity<Segments ... >>();
 				pool.destroy(object);
 			}
 
@@ -68,8 +62,6 @@ namespace pronto
 			inline void deflate_entity(bag<entity<Segments ... >> const & container)
 			{
 				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
-
-				auto lock = make_spinlock <entity<Segments ... >>();
 				pool.destroy(container);
 			}
 		}
@@ -77,13 +69,28 @@ namespace pronto
 		template <typename ... Segments>
 		inline void inflate_entity(entity<Segments ... > object)
 		{
+			thread_local auto & pool = segment_context<entity<Segments ... >, entity<Segments ... >>::get_pool();
+			auto lock = make_spinlock<entity<Segments ... >>();
+
 			detail::inflate_entity<Segments ... >(object);
+
+			{
+				pool.create(object, object);
+			}
 		}
 
 		template <typename ... Segments>
 		inline void inflate_entity(bag<entity<Segments ... >> const & container)
 		{
+			thread_local auto & pool = segment_context<entity<Segments ... >, entity<Segments ... >>::get_pool();
+			auto lock = make_spinlock<entity<Segments ... >>();
+
 			detail::inflate_entity<Segments ... >(container);
+
+			for (auto object : container)
+			{
+				pool.create(object, object);
+			}
 		}
 
 		// ----------->

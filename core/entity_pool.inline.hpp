@@ -10,7 +10,7 @@ namespace pronto
 	{
 		if (destroyed.empty()) 
 		{
-			activated.emplace_back(activated.size());
+			activated.emplace_back(static_cast<type::index_t>(activated.size()));
 
 			auto & back = activated.back();
 			utility::inflate_entity<Segments ... >(back);

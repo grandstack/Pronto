@@ -4,49 +4,46 @@
 namespace pronto
 {
 	template <typename Segment, typename ... Segments>
-	inline void segment_pool<entity<Segments ... >, Segment>::create(entity<Segments ... > object)
+	template <typename ... Parameters>
+	inline void segment_pool<entity<Segments ... >, Segment>::create(entity<Segments ... > object, Parameters const & ... arguments)
 	{
 		if (object >= size())
 		{
-			segments.resize(static_cast<std::size_t>(object * 1.5));
-			deleters.resize(static_cast<std::size_t>(object * 1.5));
+			segments.emplace_back(arguments ... );
 		}
-		
-		auto pointer = new (std::addressof(segments[object])) Segment
-		{
-			// ...
-		};
 
-		auto & deleter = deleters[object];
-		deleter.reset(pointer);
+		else 
+
+		segments[object] = Segment
+		{
+			arguments ...
+		};
 	}
 
 	template <typename Segment, typename ... Segments>
-	inline void segment_pool<entity<Segments ... >, Segment>::create(bag<entity<Segments ... >> const & container)
+	template <typename ... Parameters>
+	inline void segment_pool<entity<Segments ... >, Segment>::create(bag<entity<Segments ... >> const & container, Parameters const & ... arguments)
 	{
-		if (container.max() >= size())
-		{
-			segments.resize(size() + (container.max() - size()));
-			deleters.resize(size() + (container.max() - size()));
-		}
-
 		for (auto object : container)
 		{
-			auto pointer = new (std::addressof(segments[object])) Segment
+			if (object >= size())
 			{
-				// ...
-			};
+				segments.emplace_back(arguments ... );
 
-			auto & deleter = deleters[object];
-			deleter.reset(pointer);
+			}
+
+			else
+			segments[object] = Segment
+			{
+				arguments ...
+			};
 		}
 	}
 
 	template <typename Segment, typename ... Segments>
 	inline void segment_pool<entity<Segments ... >, Segment>::destroy(entity<Segments ... > object)
 	{
-		auto & deleter = deleters[object];
-		deleter.reset();
+		segments[object].~Segment();
 	}
 
 	template <typename Segment, typename ... Segments>
@@ -54,8 +51,7 @@ namespace pronto
 	{
 		for (auto object : container)
 		{
-			auto & deleter = deleters[object];
-			deleter.reset();
+			segments[object].~Segment();
 		}
 	}
 
