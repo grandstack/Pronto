@@ -4,6 +4,23 @@
 *.o
 *.obj
 
+# Project folders
+Debug/*
+Release/*
+x64/*
+x86/*
+
+# Project files
+main.cpp
+*.vcxproj
+*.filters
+*.user
+*.tlog
+*.log
+*.idb
+*.pdb
+
+
 # Precompiled Headers
 *.gch
 *.pch
