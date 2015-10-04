@@ -7,11 +7,14 @@ auto main() -> int
 
 	auto bag = pronto::create<person>(1000);
 
-	pronto::process(bag, [&](person & p, food & f) {
-		std::cout << "id: " << p << std::endl;
-
-		pronto::process(bag, [&](hunger & h) {
-			h.eat(f);
+	pronto::process(bag, [&](person & p1, food & f) 
+	{
+		pronto::process(bag, [&](person & p2, hunger & h) 
+		{
+			if(p1 != p2) 
+			{
+				h.eat(f);
+			}
 		});
 	});
 
