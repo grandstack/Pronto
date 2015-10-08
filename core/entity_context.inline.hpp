@@ -3,15 +3,18 @@
 
 namespace pronto
 {
-	template <typename ... Segments>
-	inline entity_pool<entity<Segments ... >> & entity_context<entity<Segments ... >>::get_pool()
+	namespace internal
 	{
-		static entity_pool<entity<Segments ... >> pool
+		template <typename ... Segments>
+		inline entity_pool<entity<Segments ... >> & entity_context<entity<Segments ... >>::get_pool()
 		{
-			// ...
-		};
+			static entity_pool<entity<Segments ... >> pool
+			{
+				// ...
+			};
 
-		return pool;
+			return pool;
+		}
 	}
 }
 

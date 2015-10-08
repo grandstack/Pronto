@@ -9,33 +9,36 @@
 
 namespace pronto
 {
-	template <typename>
-	struct spinlock;
-
-	template <typename ... Segments>
-	struct spinlock<entity<Segments ... >>
+	namespace internal
 	{
-		spinlock();
-		~spinlock();
+		template <typename>
+		struct spinlock;
 
-		spinlock(spinlock &) = delete;
-		spinlock(spinlock &&);
+		template <typename ... Segments>
+		struct spinlock<entity<Segments ... >>
+		{
+			spinlock();
+			~spinlock();
 
-		spinlock & operator = (spinlock &) = delete;
-		spinlock & operator = (spinlock &&);
+			spinlock(spinlock &) = delete;
+			spinlock(spinlock &&);
 
-	private:
+			spinlock & operator = (spinlock &) = delete;
+			spinlock & operator = (spinlock &&);
 
-		static type::basic::bool_t & get_thread_lock_state();
-		static type::atomic::bool_t & get_atomic();
+		private:
 
-		type::basic::bool_t valid = true;
-	};
+			static type::bool_t & get_thread_lock_state();
+			static type::atomic::bool_t & get_atomic();
 
-	// ----------------------------------------->
+			type::bool_t valid = true;
+		};
 
-	template <typename Entity>
-	spinlock<Entity> make_spinlock();
+		// ----------------------------------------->
+
+		template <typename Entity>
+		spinlock<Entity> make_spinlock();
+	}
 }
 
 #include "spinlock.inline.hpp"

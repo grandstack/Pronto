@@ -19,6 +19,39 @@ namespace pronto
 
 		namespace detail
 		{
+			template <typename, typename>
+			struct carrier_contains;
+
+			template <typename Type, typename Current>
+			struct carrier_contains<type_carrier<Current>, Type>
+			{
+				enum : bool { value = std::is_same<Current, Type>::value };
+			};
+
+			template <typename Type, typename Current, typename Next, typename ... Rest>
+			struct carrier_contains<type_carrier<Current, Next, Rest ... >, Type>
+			{
+				enum : bool { value = carrier_contains<type_carrier<Current>, Type>::value || carrier_contains<type_carrier<Next, Rest ... >, Type>::value };
+			};
+		}
+
+		template <typename, typename>
+		struct carrier_contains;
+
+		template <typename ... Types, typename Current>
+		struct carrier_contains<type_carrier<Types ... >, type_carrier<Current>>
+		{
+			enum : bool { value = detail::carrier_contains<type_carrier<Types ... >, Current>::value };
+		};
+
+		template <typename ... Types, typename Current, typename Next, typename ... Rest>
+		struct carrier_contains<type_carrier<Types ... >, type_carrier<Current, Next, Rest ... >>
+		{
+			enum : bool { value = detail::carrier_contains<type_carrier<Types ... >, Current>::value && carrier_contains<type_carrier<Types ... >, type_carrier<Next, Rest ... >>::value };
+		};
+
+		namespace detail
+		{
 			template <typename>
 			struct parameters;
 
@@ -78,51 +111,6 @@ namespace pronto
 
 		template <unsigned Length>
 		using ascending_indices_t = typename detail::ascending_indices<Length>::type;
-
-		// ----------------------------------------->
-
-		namespace detail
-		{
-			template <typename Current, typename Next, typename ... Rest, typename ... Pack>
-			void inflate_entity(entity<Pack ... >);
-
-			template <typename Current, typename ... Pack>
-			void inflate_entity(entity<Pack ... >);
-
-			template <typename Current, typename Next, typename ... Rest, typename ... Pack>
-			void inflate_entity(bag<entity<Pack ... >> const &);
-
-			template <typename Current, typename ... Pack>
-			void inflate_entity(bag<entity<Pack ... >> const &);
-
-			// ----------->
-
-			template <typename Current, typename Next, typename ... Rest, typename ... Pack>
-			void deflate_entity(entity<Pack ... >);
-
-			template <typename Current, typename ... Pack>
-			void deflate_entity(entity<Pack ... >);
-
-			template <typename Current, typename Next, typename ... Rest, typename ... Pack>
-			void deflate_entity(bag<entity<Pack ... >> const &);
-
-			template <typename Current, typename ... Pack>
-			void deflate_entity(bag<entity<Pack ... >> const &);
-		}
-
-		template <typename ... Pack>
-		void inflate_entity(entity<Pack ... >);
-
-		template <typename ... Pack>
-		void inflate_entity(bag<entity<Pack ... >> const &);
-
-		// ----------->
-
-		template <typename ... Pack>
-		void deflate_entity(entity<Pack ... >);
-
-		template <typename ... Pack>
-		void deflate_entity(bag<entity<Pack ... >> const &);
 	}
 }
 

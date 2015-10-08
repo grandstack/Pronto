@@ -6,32 +6,35 @@ namespace pronto
 	namespace detail
 	{
 		template <typename Functor, typename ... Segments, typename ... Arguments>
-		inline decltype(auto) process(entity<Segments ... > object, utility::type_carrier<Arguments ... >, Functor functor)
+		inline type::bool_t process(entity<Segments ... > object, utility::type_carrier<Arguments ... >, Functor functor)
 		{
-			thread_local auto pools = std::tie(segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
+			thread_local auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
 
-			{
-				return functor(std::get<segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[object] ... );
-			}
+			functor(std::get<internal::segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[object] ... );
+
+			return true;
 		}
 
 		template <typename Functor, typename ... Segments, typename ... Arguments>
-		inline void process(bag<entity<Segments ... >> const & container, utility::type_carrier<Arguments ... >, Functor functor)
+		inline type::bool_t process(bag<entity<Segments ... >> const & container, utility::type_carrier<Arguments ... >, Functor functor)
 		{
-			thread_local auto pools = std::tie(segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
+			thread_local auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
 
 			for (auto object : container)
 			{
-				functor(std::get<segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[object] ... );
+				functor(std::get<internal::segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[object] ... );
 			}
+
+			return true;
 		}
 	}
 
 	template <typename Functor, typename ... Segments>
-	inline decltype(auto) process(entity<Segments ... > object, Functor && functor)
+	inline type::bool_t process(entity<Segments ... > object, Functor && functor)
 	{
-		auto lock = make_spinlock<entity<Segments ... >>();
+		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
 
+		auto lock = internal::make_spinlock<entity<Segments ... >>();
 		auto parameters = utility::parameters_t<Functor>
 		{
 			// ...
@@ -41,16 +44,17 @@ namespace pronto
 	}
 
 	template <typename Functor, typename ... Segments>
-	inline void process(bag<entity<Segments ... >> const & container, Functor && functor)
+	inline type::bool_t process(bag<entity<Segments ... >> const & container, Functor && functor)
 	{
-		auto lock = make_spinlock<entity<Segments ... >>();
+		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
 
+		auto lock = internal::make_spinlock<entity<Segments ... >>();
 		auto parameters = utility::parameters_t<Functor>
 		{
 			// ...
 		};
 
-		detail::process(container, parameters, std::forward<Functor>(functor));
+		return detail::process(container, parameters, std::forward<Functor>(functor));
 	}
 }
 

@@ -29,7 +29,7 @@ namespace pronto
 
 		void clear();
 
-		type::basic::bool_t contains(entity<Segments ... >) const;
+		type::bool_t contains(entity<Segments ... >) const;
 
 		type::index_t size() const;
 

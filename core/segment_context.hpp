@@ -5,14 +5,17 @@
 
 namespace pronto
 {
-	template <typename, typename>
-	struct segment_context;
-
-	template <typename Segment, typename ... Segments>
-	struct segment_context<entity<Segments ... >, Segment>
+	namespace internal
 	{
-		static segment_pool<entity<Segments ... >, Segment> & get_pool();
-	};
+		template <typename, typename>
+		struct segment_context;
+
+		template <typename Segment, typename ... Segments>
+		struct segment_context<entity<Segments ... >, Segment>
+		{
+			static segment_pool<entity<Segments ... >, Segment> & get_pool();
+		};
+	}
 }
 
 #include "segment_context.inline.hpp"

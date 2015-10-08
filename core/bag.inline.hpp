@@ -52,7 +52,7 @@ namespace pronto
 	}
 
 	template <typename ... Segments>
-	inline type::basic::bool_t bag<entity<Segments ... >>::contains(entity<Segments ... > object) const
+	inline type::bool_t bag<entity<Segments ... >>::contains(entity<Segments ... > object) const
 	{
 		return std::binary_search(std::begin(storage), std::end(storage), object);
 	}
