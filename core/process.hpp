@@ -6,7 +6,6 @@
 #include "utility.hpp"
 
 #include <functional>
-#include <thread>
 #include <atomic>
 
 namespace pronto

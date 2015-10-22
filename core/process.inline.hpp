@@ -34,7 +34,6 @@ namespace pronto
 	{
 		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
 
-		auto lock = internal::make_spinlock<entity<Segments ... >>();
 		auto parameters = utility::parameters_t<Functor>
 		{
 			// ...
@@ -48,7 +47,6 @@ namespace pronto
 	{
 		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
 
-		auto lock = internal::make_spinlock<entity<Segments ... >>();
 		auto parameters = utility::parameters_t<Functor>
 		{
 			// ...

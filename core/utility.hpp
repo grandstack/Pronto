@@ -2,7 +2,6 @@
 #define pronto_utility_header
 
 #include "segment_pool.hpp"
-#include "spinlock.hpp"
 #include "entity.hpp"
 
 #include <tuple>

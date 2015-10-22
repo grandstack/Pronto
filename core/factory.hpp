@@ -3,6 +3,7 @@
 
 #include "segment_context.hpp"
 #include "entity_context.hpp"
+#include "synchronizer.hpp"
 #include "process.hpp"
 
 namespace pronto

@@ -24,10 +24,11 @@ namespace pronto
 		void insert(bag<entity<Segments ... >> const &);
 		void insert(entity<Segments ... >);
 
+		void clear();
+
 		void remove(bag<entity<Segments ... >> const &);
 		void remove(entity<Segments ... >);
 
-		void clear();
 
 		type::bool_t contains(entity<Segments ... >) const;
 

@@ -25,6 +25,12 @@ namespace pronto
 	}
 
 	template <typename ... Segments>
+	inline void bag<entity<Segments ... >>::clear()
+	{
+		storage.clear();
+	}
+
+	template <typename ... Segments>
 	inline void bag<entity<Segments ... >>::remove(bag<entity<Segments ... >> const & other)
 	{
 		auto begin = std::begin(storage);
@@ -43,12 +49,6 @@ namespace pronto
 		auto end = std::end(storage);
 
 		storage.erase(std::upper_bound(begin, end, object));
-	}
-
-	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::clear()
-	{
-		storage.clear();
 	}
 
 	template <typename ... Segments>

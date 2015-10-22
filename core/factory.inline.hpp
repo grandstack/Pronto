@@ -6,60 +6,81 @@ namespace pronto
 	template <typename Entity>
 	inline Entity create()
 	{
-		thread_local auto & pool = entity_context<Entity>::get_pool();
-		auto lock = make_spinlock<Entity>();
+		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		return pool.create();
+		return synchronize<Entity>([&]
+		{
+			return pool.create();
+		});
 	}
 
 	template <typename Entity>
 	inline bag<Entity> create(type::index_t size)
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
-		auto lock = internal::make_spinlock<Entity>();
 
-		return pool.create(size);
+		return synchronize<Entity>([&]
+		{
+			return pool.create(size);
+		});
+	}
+
+	template <typename Entity>
+	inline void destroy(Entity object)
+	{
+		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
+
+		synchronize<Entity>([&]
+		{
+			pool.destroy(object);
+		});
 	}
 
 	template <typename Entity>
 	inline void destroy(bag<Entity> const & container)
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
-		auto lock = internal::make_spinlock<Entity>();
 
-		pool.destroy(container);
+		synchronize<Entity>([&]
+		{
+			pool.destroy(container);
+		});
 	}
 
 	template <typename Entity>
 	inline bool validate(Entity object)
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
-		auto lock = internal::make_spinlock<Entity>();
 
-		return pool.valid(object);
+		return synchronize([&]
+		{
+			return pool.valid(object);
+		});
 	}
 
 	template <typename Entity>
 	inline bool validate(bag<Entity> const & container)
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
-		auto lock = internal::make_spinlock<Entity>();
 
-		for (auto object : container)
+		return synchronize([&]
 		{
-			if (pool.valid(object))
+			for (auto object : container)
 			{
-				continue;
+				if (pool.valid(object))
+				{
+					continue;
+				}
+
+				else
+
+				{
+					return false;
+				}
 			}
 
-			else
-
-			{
-				return false;
-			}
-		}
-
-		return true;
+			return true;
+		});
 	}
 }
 

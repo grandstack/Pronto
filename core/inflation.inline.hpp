@@ -40,7 +40,6 @@ namespace pronto
 		inline void inflate_entity(entity<Segments ... > object)
 		{
 			thread_local auto & pool = segment_context<entity<Segments ... >, entity<Segments ... >>::get_pool();
-			auto lock = make_spinlock<entity<Segments ... >>();
 
 			detail::inflate_entity<Segments ... >(object);
 
@@ -51,7 +50,6 @@ namespace pronto
 		inline void inflate_entity(bag<entity<Segments ... >> const & container)
 		{
 			thread_local auto & pool = segment_context<entity<Segments ... >, entity<Segments ... >>::get_pool();
-			auto lock = make_spinlock<entity<Segments ... >>();
 
 			detail::inflate_entity<Segments ... >(container);
 
