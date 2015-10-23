@@ -19,8 +19,6 @@ auto main() -> int
 				h.eat(f)
 			});
 		});
-
-		pronto::destroy(bag);
 	});
 }
 ```
