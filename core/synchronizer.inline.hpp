@@ -7,23 +7,31 @@ namespace pronto
 {
 	namespace internal
 	{
-		template <typename Current>
-		inline bool aquire_entities()
+		namespace detail
 		{
-			thread_local auto & atomic = entity_lock<Current>::get_state();
-
-			if (atomic.exchange(true))
+			template <typename Entity>
+			type::bool_t & thread_lock_state()
 			{
-				return false;
-			}
+				thread_local type::bool_t state
+				{
+					false
+				};
 
-			return true;
+				return state;
+			}
 		}
 
-		template <typename Current, typename Next, typename ... Rest>
-		inline bool aquire_entities()
+		template <typename Current>
+		inline type::bool_t aquire_entities()
 		{
 			thread_local auto & atomic = entity_lock<Current>::get_state();
+
+			auto & thread_state = detail::thread_lock_state<Current>();
+
+			if (thread_state)
+			{
+				return true;
+			}
 
 			if (atomic.exchange(true))
 			{
@@ -33,6 +41,37 @@ namespace pronto
 			else
 
 			{
+				thread_state = true;
+
+				return true;
+			}
+		}
+
+		template <typename Current, typename Next, typename ... Rest>
+		inline type::bool_t  aquire_entities()
+		{
+			thread_local auto & atomic = entity_lock<Current>::get_state();
+
+			auto & thread_state = detail::thread_lock_state<Current>();
+
+			if (thread_state)
+			{
+				if (aquire_entities<Next, Rest ... >())
+				{
+					return true;
+				} return false;
+			}
+
+			if (atomic.exchange(true))
+			{
+				return false;
+			}
+
+			else
+
+			{
+				thread_state = true;
+
 				if (aquire_entities<Next, Rest ... >())
 				{
 					return true;
@@ -41,7 +80,8 @@ namespace pronto
 				else
 
 				{
-					atomic.store(false);
+					atomic.store(false, std::memory_order_release);
+					thread_state = false;
 
 					return false;
 				}
@@ -53,7 +93,10 @@ namespace pronto
 		{
 			thread_local auto & atomic = entity_lock<Current>::get_state();
 
-			atomic.store(false);
+			auto & thread_state = detail::thread_lock_state<Current>();
+
+			atomic.store(false, std::memory_order_release);
+			thread_state = false;
 		}
 
 		template <typename Current, typename Next, typename ... Rest>
@@ -61,8 +104,12 @@ namespace pronto
 		{
 			thread_local auto & atomic = entity_lock<Current>::get_state();
 
+			auto & thread_state = detail::thread_lock_state<Current>();
+
 			release_entities<Next, Rest ... >();
-			atomic.store(false);
+
+			atomic.store(false, std::memory_order_release);
+			thread_state = false;
 		}
 	}
 
@@ -112,8 +159,6 @@ namespace pronto
 
 			throw;
 		}
-
-		internal::release_entities<Entities ... >();
 	}
 }
 

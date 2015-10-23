@@ -9,11 +9,17 @@ namespace pronto
 {
 	namespace internal
 	{
+		namespace detail
+		{
+			template <typename Entity>
+			type::bool_t & thread_lock_state();
+		}
+
 		template <typename Current>
-		bool aquire_entities();
+		type::bool_t aquire_entities();
 
 		template <typename Current, typename Next, typename ... Rest>
-		bool aquire_entities();
+		type::bool_t aquire_entities();
 
 		template <typename Current>
 		void release_entities();

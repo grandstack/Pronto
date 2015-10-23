@@ -8,10 +8,7 @@ namespace pronto
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		return synchronize<Entity>([&]
-		{
-			return pool.create();
-		});
+		return pool.create();
 	}
 
 	template <typename Entity>
@@ -19,10 +16,7 @@ namespace pronto
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		return synchronize<Entity>([&]
-		{
-			return pool.create(size);
-		});
+		return pool.create(size);
 	}
 
 	template <typename Entity>
@@ -30,10 +24,7 @@ namespace pronto
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		synchronize<Entity>([&]
-		{
-			pool.destroy(object);
-		});
+		pool.destroy(object);
 	}
 
 	template <typename Entity>
@@ -41,10 +32,7 @@ namespace pronto
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		synchronize<Entity>([&]
-		{
-			pool.destroy(container);
-		});
+		pool.destroy(container);
 	}
 
 	template <typename Entity>
@@ -52,10 +40,7 @@ namespace pronto
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		return synchronize([&]
-		{
-			return pool.valid(object);
-		});
+		return pool.valid(object);
 	}
 
 	template <typename Entity>
@@ -63,24 +48,21 @@ namespace pronto
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		return synchronize([&]
+		for (auto object : container)
 		{
-			for (auto object : container)
+			if (pool.valid(object))
 			{
-				if (pool.valid(object))
-				{
-					continue;
-				}
-
-				else
-
-				{
-					return false;
-				}
+				continue;
 			}
 
-			return true;
-		});
+			else
+
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
 
