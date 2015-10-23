@@ -7,7 +7,7 @@ auto main() -> int
 	using bulldog = pronto::entity<food, hunger, dog>;
 
 	// Synchronization for concurrent read and write attempts ...
-	pronto::synchronize<person, dog>([]
+	pronto::synchronize<person, bulldog>([]
 	{
 		auto people = pronto::create<person>(1000);
 		auto bulldogs = pronto::create<bulldog>(1000);
