@@ -3,21 +3,24 @@
 ```cpp
 auto main() -> int
 {
-	using person = pronto::entity<food, hunger>;
+	using person = pronto::entity<food, hunger, human>;
+	using bulldog = pronto::entity<food, hunger, dog>;
 
-	auto bag = pronto::create<person>(1000);
+	// Synchronization for concurrent read and write attempts ...
+	pronto::synchronize<person, dog>([]
+	{
+		auto people = pronto::create<person>(1000);
+		auto bulldogs = pronto::create<bulldog>(1000);
 
-	pronto::process(bag, [&](person & one, food & f) {
-		std::cout << "id: " << one << std::endl;
+		pronto::process(people, [&](person & p, food & f) {
+			std::cout << "entity id: " << p << std::endl;
 
-		pronto::process(bag, [&](person & two, hunger & h) {
-			if(one != two)
-			{
-				h.eat(f);
-			}
+			pronto::process(bulldogs, [&](hunger & h) {
+				h.eat(f)
+			});
 		});
-	});
 
-	pronto::destroy(bag);
+		pronto::destroy(bag);
+	});
 }
 ```
