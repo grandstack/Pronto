@@ -31,16 +31,16 @@ namespace pronto
 		}
 
 		template <typename ... Segments>
-		inline bag<entity<Segments ... >> entity_pool<entity<Segments ... >>::create(type::index_t size)
+		inline bag<entity<Segments ... >> entity_pool<entity<Segments ... >>::create(type::index_t const count)
 		{
 			auto container = bag<entity<Segments ... >>
 			{
 				// ...
 			};
 
-			container.reserve(size);
+			container.reserve(count);
 
-			for (type::index_t i = 0; i < size; ++i)
+			for (type::index_t i = 0; i < count; ++i)
 			{
 				container.insert(create());
 			}
@@ -49,7 +49,7 @@ namespace pronto
 		}
 
 		template <typename ... Segments>
-		inline void entity_pool<entity<Segments ... >>::destroy(entity<Segments ... > object)
+		inline void entity_pool<entity<Segments ... >>::destroy(entity<Segments ... > const object)
 		{
 			if (valid(object))
 			{
@@ -76,7 +76,7 @@ namespace pronto
 		}
 
 		template <typename ... Segments>
-		inline bool entity_pool<entity<Segments ... >>::contains(entity<Segments ... > object) const
+		inline bool entity_pool<entity<Segments ... >>::contains(entity<Segments ... > const object) const
 		{
 			if (object < (activated.size() + destroyed.size()))
 			{
@@ -87,7 +87,7 @@ namespace pronto
 		}
 
 		template <typename ... Segments>
-		inline bool entity_pool<entity<Segments ... >>::valid(entity<Segments ... > object) const
+		inline bool entity_pool<entity<Segments ... >>::valid(entity<Segments ... > const object) const
 		{
 			if (contains(object))
 			{

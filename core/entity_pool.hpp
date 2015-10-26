@@ -21,13 +21,13 @@ namespace pronto
 			using value_type = entity<Segments ... >;
 
 			entity<Segments ... > create();
-			bag<entity<Segments ... >> create(type::index_t);
+			bag<entity<Segments ... >> create(type::index_t const count);
 
-			void destroy(entity<Segments ... >);
-			void destroy(bag<entity<Segments ... >> const &);
+			void destroy(entity<Segments ... > const object);
+			void destroy(bag<entity<Segments ... >> const & container);
 
-			type::bool_t contains(entity<Segments ... >) const;
-			type::bool_t valid(entity<Segments ... >) const;
+			type::bool_t contains(entity<Segments ... > const object) const;
+			type::bool_t valid(entity<Segments ... > const object) const;
 
 			type::index_t size() const;
 

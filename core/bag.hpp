@@ -16,21 +16,20 @@ namespace pronto
 	{
 		bag() = default;
 
-		bag(bag<entity<Segments ... >> &) = default;
-		bag(bag<entity<Segments ... >> &&) = default;
+		bag(bag<entity<Segments ... >> const & other) = default;
+		bag(bag<entity<Segments ... >> && other) = default;
 
 		void reserve(type::index_t);
 
-		void insert(bag<entity<Segments ... >> const &);
-		void insert(entity<Segments ... >);
+		void insert(bag<entity<Segments ... >> const & container);
+		void insert(entity<Segments ... > const object);
 
 		void clear();
 
-		void remove(bag<entity<Segments ... >> const &);
-		void remove(entity<Segments ... >);
+		void remove(bag<entity<Segments ... >> const & container);
+		void remove(entity<Segments ... > const object);
 
-
-		type::bool_t contains(entity<Segments ... >) const;
+		type::bool_t contains(entity<Segments ... > const object) const;
 
 		type::index_t size() const;
 

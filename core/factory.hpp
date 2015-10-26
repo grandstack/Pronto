@@ -12,19 +12,19 @@ namespace pronto
 	Entity create();
 
 	template <typename Entity>
-	bag<Entity> create(type::index_t);
+	bag<Entity> create(type::index_t const count);
 
 	template <typename Entity>
-	void destroy(Entity);
+	void destroy(Entity const object);
 
 	template <typename Entity>
-	void destroy(bag<Entity> const &);
+	void destroy(bag<Entity> const & container);
 
 	template <typename Entity>
-	bool validate(Entity);
+	bool validate(Entity const object);
 
 	template <typename Entity>
-	bool validate(bag<Entity> const &);
+	bool validate(bag<Entity> const & container);
 }
 
 #include "factory.inline.hpp"

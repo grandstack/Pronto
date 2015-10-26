@@ -15,24 +15,26 @@ namespace pronto
 			type::bool_t & thread_lock_state();
 		}
 
-		template <typename Current>
-		type::bool_t aquire_entities();
+		template <typename Current, typename Functor>
+		type::bool_t synchronize(Functor && functor) noexcept(noexcept(functor()));
 
-		template <typename Current, typename Next, typename ... Rest>
-		type::bool_t aquire_entities();
+		template <typename Current, typename Next, typename ... Rest, typename Functor>
+		type::bool_t synchronize(Functor && functor) noexcept(noexcept(functor()));
 
-		template <typename Current>
-		void release_entities();
+		template <typename Current, typename Functor, typename Result>
+		type::bool_t synchronize(Functor && functor, Result && value) noexcept(noexcept(functor()));
 
-		template <typename Current, typename Next, typename ... Rest>
-		void release_entities();
+		template <typename Current, typename Next, typename ... Rest, typename Functor, typename Result>
+		type::bool_t synchronize(Functor && functor, Result && value) noexcept(noexcept(functor()));
 	}
 
 	template <typename ... Entities, typename Functor>
-	inline auto synchronize(Functor functor) -> typename std::enable_if<std::is_void<decltype(functor())>::value == true, decltype(functor())>::type;
+	auto synchronize(Functor && functor) noexcept(noexcept(functor()))
+		-> typename std::enable_if<std::is_void<decltype(functor())>::value == true, decltype(functor())>::type;
 
 	template <typename ... Entities, typename Functor>
-	inline auto synchronize(Functor functor) -> typename std::enable_if<std::is_void<decltype(functor())>::value == false, decltype(functor())>::type;
+	auto synchronize(Functor && functor) noexcept(noexcept(functor()))
+		-> typename std::enable_if<std::is_void<decltype(functor())>::value == false, decltype(functor())>::type;
 }
 
 #include "synchronizer.inline.hpp"

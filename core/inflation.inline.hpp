@@ -8,14 +8,14 @@ namespace pronto
 		namespace detail
 		{
 			template <typename Current, typename Next, typename ... Rest, typename ... Segments>
-			inline void inflate_entity(entity<Segments ... > object)
+			inline void inflate_entity(entity<Segments ... > const object)
 			{
 				detail::inflate_entity<Next, Rest ... >(object);
 				detail::inflate_entity<Current>(object);
 			}
 
 			template <typename Current, typename ... Segments>
-			inline void inflate_entity(entity<Segments ... > object)
+			inline void inflate_entity(entity<Segments ... > const object)
 			{
 				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
 				pool.create(object);
@@ -37,7 +37,7 @@ namespace pronto
 		}
 
 		template <typename ... Segments>
-		inline void inflate_entity(entity<Segments ... > object)
+		inline void inflate_entity(entity<Segments ... > const object)
 		{
 			thread_local auto & pool = segment_context<entity<Segments ... >, entity<Segments ... >>::get_pool();
 

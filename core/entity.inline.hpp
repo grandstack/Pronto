@@ -4,7 +4,7 @@
 namespace pronto
 {
 	template <typename ... Segments>
-	inline entity<Segments ... >::entity(type::index_t index)
+	inline entity<Segments ... >::entity(type::index_t const index)
 	{
 		entity<Segments ... >::index = index;
 	}

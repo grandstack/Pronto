@@ -12,15 +12,15 @@ namespace pronto
 	}
 
 	template <typename Entity>
-	inline bag<Entity> create(type::index_t size)
+	inline bag<Entity> create(type::index_t const count)
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
-		return pool.create(size);
+		return pool.create(count);
 	}
 
 	template <typename Entity>
-	inline void destroy(Entity object)
+	inline void destroy(Entity const object)
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 
@@ -36,7 +36,7 @@ namespace pronto
 	}
 
 	template <typename Entity>
-	inline bool validate(Entity object)
+	inline bool validate(Entity const object)
 	{
 		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
 

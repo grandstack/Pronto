@@ -46,7 +46,7 @@ namespace pronto
 		}
 
 		template <typename Segment, typename ... Segments>
-		inline Segment & segment_pool<entity<Segments ... >, Segment>::operator [] (entity<Segments ... > object)
+		inline Segment & segment_pool<entity<Segments ... >, Segment>::operator [] (entity<Segments ... > const object)
 		{
 			return reinterpret_cast<Segment(&)>(segments[object]);
 		}

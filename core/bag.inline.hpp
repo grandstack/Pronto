@@ -16,7 +16,7 @@ namespace pronto
 	}
 
 	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::insert(entity<Segments ... > object)
+	inline void bag<entity<Segments ... >>::insert(entity<Segments ... > const object)
 	{
 		auto begin = std::begin(storage);
 		auto end = std::end(storage);
@@ -43,7 +43,7 @@ namespace pronto
 	}
 
 	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::remove(entity<Segments ... > object)
+	inline void bag<entity<Segments ... >>::remove(entity<Segments ... > const object)
 	{
 		auto begin = std::begin(storage);
 		auto end = std::end(storage);
@@ -52,7 +52,7 @@ namespace pronto
 	}
 
 	template <typename ... Segments>
-	inline type::bool_t bag<entity<Segments ... >>::contains(entity<Segments ... > object) const
+	inline type::bool_t bag<entity<Segments ... >>::contains(entity<Segments ... > const object) const
 	{
 		return std::binary_search(std::begin(storage), std::end(storage), object);
 	}

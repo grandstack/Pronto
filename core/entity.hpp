@@ -8,7 +8,7 @@ namespace pronto
 	template <typename ... Segments>
 	struct entity
 	{
-		entity(type::index_t);
+		entity(type::index_t const index);
 
 		operator type::index_t () const;
 
