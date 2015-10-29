@@ -30,8 +30,7 @@ namespace pronto
 			{
 				if (object >= size())
 				{
-					segments.emplace_back(arguments ...);
-
+					segments.emplace_back(arguments ... );
 				}
 
 				else
@@ -48,7 +47,7 @@ namespace pronto
 		template <typename Segment, typename ... Segments>
 		inline Segment & segment_pool<entity<Segments ... >, Segment>::operator [] (entity<Segments ... > const object)
 		{
-			return reinterpret_cast<Segment(&)>(segments[object]);
+			return segments[object];
 		}
 
 		template <typename Segment, typename ... Segments>

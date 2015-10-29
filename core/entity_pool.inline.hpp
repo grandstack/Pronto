@@ -10,22 +10,21 @@ namespace pronto
 		{
 			if (destroyed.empty())
 			{
-				activated.emplace_back(static_cast<type::index_t>(activated.size()));
+				auto entity_index = static_cast<type::index_t>(activated.size());
 
-				auto & back = activated.back();
-				inflate_entity<Segments ... >(back);
+				inflate_entity<Segments ... >(entity_index);
+				activated.emplace_back(entity_index);
 
 				return back;
 			}
 
-			auto begin = std::begin(activated);
-			auto end = std::end(activated);
-
 			auto back = destroyed.back();
 			destroyed.pop_back();
 
+			auto insertion_point = std::upper_bound(std::begin(activated), std::end(activated), back);
+
 			inflate_entity<Segments ... >(back);
-			activated.insert(std::upper_bound(begin, end, back), back);
+			activated.insert(insertion_point, back);
 
 			return back;
 		}
@@ -33,19 +32,89 @@ namespace pronto
 		template <typename ... Segments>
 		inline bag<entity<Segments ... >> entity_pool<entity<Segments ... >>::create(type::index_t const count)
 		{
-			auto container = bag<entity<Segments ... >>
+			auto container = std::vector<entity<Segments ... >>
 			{
 				// ...
 			};
 
 			container.reserve(count);
+			activated.reserve(count);
 
-			for (type::index_t i = 0; i < count; ++i)
+			auto available = destroyed.size();
+
+			if (available > count)
 			{
-				container.insert(create());
+				auto head = destroyed.front();
+				auto tail = destroyed.front();
+
+				for (auto object : destroyed)
+				{
+					if ((available - head) < count)
+					{
+						break;
+					}
+
+					if (head != object - 1)
+					{
+						head = object;
+						tail = object;
+					}
+
+					else
+
+					{
+						head = object;
+
+						if ((head - tail) == count)
+						{
+							{
+								auto begin = std::begin(destroyed) + (tail + 0);
+								auto end = std::begin(destroyed) + (head + 1);
+
+								container.insert(std::begin(container), begin, end);
+								destroyed.erase(begin, end);
+
+								for (auto object : container)
+								{
+									inflate_entity<Segments ... >(object);
+								}
+							}
+
+							{
+								auto insertion_point = std::upper_bound(std::begin(activated), std::end(activated), destroyed[tail]);
+
+								auto begin = std::begin(container);
+								auto end = std::end(container);
+
+								activated.insert(insertion_point, begin, end);
+							}
+
+							return bag<entity<Segments ... >>
+							{ 
+								std::begin(container), 
+								std::end(container)
+							};
+						}
+					}
+				}
 			}
 
-			return container;
+			container.resize(count, 0);
+
+			for (auto & object : container)
+			{
+				auto index = static_cast<type::index_t>(activated.size());
+
+				inflate_entity<Segments ... >(index);
+				activated.emplace_back(index);
+				object = index;
+			}
+
+			return bag<entity<Segments ... >>
+			{ 
+				std::begin(container), 
+				std::end(container) 
+			};
 		}
 
 		template <typename ... Segments>
@@ -60,7 +129,9 @@ namespace pronto
 
 				if (position != end)
 				{
-					destroyed.push_back(object);
+					auto insertion_point = std::upper_bound(std::begin(destroyed), std::end(destroyed), object);
+
+					destroyed.insert(insertion_point, object);
 					activated.erase(position);
 				}
 			}
@@ -69,9 +140,20 @@ namespace pronto
 		template <typename ... Segments>
 		inline void entity_pool<entity<Segments ... >>::destroy(bag<entity<Segments ... >> const & container)
 		{
-			for (auto object : container)
 			{
-				destroy(object);
+				auto insertion_point = std::upper_bound(std::begin(destroyed), std::end(destroyed), container.front());
+
+				auto begin = std::begin(container);
+				auto end = std::end(container);
+
+				destroyed.insert(insertion_point, begin, end);
+			}
+
+			{
+				auto begin = std::lower_bound(std::begin(activated), std::end(activated), container.front());
+				auto end = std::upper_bound(std::begin(activated), std::end(activated), container.back());
+
+				activated.erase(begin, end);
 			}
 		}
 

@@ -4,51 +4,11 @@
 namespace pronto
 {
 	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::insert(bag<entity<Segments ... >> const & other)
+	template <typename Iterator>
+	inline bag<entity<Segments ... >>::bag(Iterator first, Iterator last)
 	{
-		auto begin = std::begin(storage);
-		auto end = std::end(storage);
-
-		for (auto & object : other)
-		{
-			storage.insert(std::upper_bound(begin, end, object), object);
-		}
-	}
-
-	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::insert(entity<Segments ... > const object)
-	{
-		auto begin = std::begin(storage);
-		auto end = std::end(storage);
-
-		storage.insert(std::upper_bound(begin, end, object), object);
-	}
-
-	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::clear()
-	{
-		storage.clear();
-	}
-
-	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::remove(bag<entity<Segments ... >> const & other)
-	{
-		auto begin = std::begin(storage);
-		auto end = std::end(storage);
-
-		for (auto & object : other)
-		{
-			storage.erase(std::upper_bound(begin, end, object));
-		}
-	}
-
-	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::remove(entity<Segments ... > const object)
-	{
-		auto begin = std::begin(storage);
-		auto end = std::end(storage);
-
-		storage.erase(std::upper_bound(begin, end, object));
+		storage.reserve(std::distance(first, last));
+		storage.insert(std::begin(storage), first, last);
 	}
 
 	template <typename ... Segments>
@@ -58,43 +18,61 @@ namespace pronto
 	}
 
 	template <typename ... Segments>
+	entity<Segments ... > bag<entity<Segments ... >>::front() const
+	{
+		if (storage.empty())
+		{
+			throw std::out_of_range
+			{
+				"calling front on empty bag!"
+			};
+		}
+
+		return storage.front();
+	}
+
+	template <typename ... Segments>
+	entity<Segments ... > bag<entity<Segments ... >>::back() const
+	{
+		if (storage.empty())
+		{
+			throw std::out_of_range
+			{
+				"calling back on empty bag!"
+			};
+		}
+
+		return storage.back();
+	}
+
+	template <typename ... Segments>
+	inline type::bool_t bag<entity<Segments ... >>::empty() const
+	{
+		return static_cast<type::bool_t>(storage.empty());
+	}
+
+	template <typename ... Segments>
 	inline type::index_t bag<entity<Segments ... >>::size() const
 	{
 		return static_cast<type::index_t>(storage.size());
 	}
 
 	template <typename ... Segments>
-	inline type::index_t bag<entity<Segments ... >>::min() const
+	inline void bag<entity<Segments ... >>::reserve(type::index_t const count)
 	{
-		if (storage.empty())
-		{
-			throw std::out_of_range
-			{
-				"calling min on empty bag!"
-			};
-		}
-
-		return static_cast<type::index_t>(storage.front());
+		storage.reserve(count);
 	}
 
 	template <typename ... Segments>
-	inline type::index_t bag<entity<Segments ... >>::max() const
+	inline void bag<entity<Segments ... >>::clear()
 	{
-		if (storage.empty())
-		{
-			throw std::out_of_range
-			{
-				"calling max on empty bag!"
-			};
-		}
-
-		return static_cast<type::index_t>(storage.back());
+		storage.clear();
 	}
 
 	template <typename ... Segments>
-	inline void bag<entity<Segments ... >>::reserve(type::index_t size)
+	entity<Segments ... > bag<entity<Segments ... >>::operator [] (type::index_t const index) const
 	{
-		storage.reserve(size);
+		return storage[index];
 	}
 
 	template <typename ... Segments>

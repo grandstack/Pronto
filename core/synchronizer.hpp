@@ -22,10 +22,10 @@ namespace pronto
 		type::bool_t synchronize(Functor && functor) noexcept(noexcept(functor()));
 
 		template <typename Current, typename Functor, typename Result>
-		type::bool_t synchronize(Functor && functor, Result && value) noexcept(noexcept(functor()));
+		type::bool_t synchronize(Functor && functor, Result && result) noexcept(noexcept(functor()));
 
 		template <typename Current, typename Next, typename ... Rest, typename Functor, typename Result>
-		type::bool_t synchronize(Functor && functor, Result && value) noexcept(noexcept(functor()));
+		type::bool_t synchronize(Functor && functor, Result && result) noexcept(noexcept(functor()));
 	}
 
 	template <typename ... Entities, typename Functor>
