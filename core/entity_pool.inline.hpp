@@ -10,7 +10,7 @@ namespace pronto
 		{
 			if (destroyed.empty())
 			{
-				auto entity_index = static_cast<type::index_t>(activated.size());
+				auto entity_index = size();
 
 				inflate_entity<Segments ... >(entity_index);
 				activated.emplace_back(entity_index);
@@ -21,10 +21,10 @@ namespace pronto
 			auto back = destroyed.back();
 			destroyed.pop_back();
 
-			auto insertion_point = std::upper_bound(std::begin(activated), std::end(activated), back);
+			auto entry = std::lower_bound(std::begin(activated), std::end(activated), back);
 
 			inflate_entity<Segments ... >(back);
-			activated.insert(insertion_point, back);
+			activated.insert(entry, back);
 
 			return back;
 		}
@@ -37,8 +37,12 @@ namespace pronto
 				// ...
 			};
 
+			if ((activated.capacity() - activated.size()) < count)
+			{
+				activated.reserve(((activated.size() + 1) / 2) + count);
+			} 
+			
 			container.reserve(count);
-			activated.reserve(count);
 
 			auto available = destroyed.size();
 
@@ -49,9 +53,35 @@ namespace pronto
 
 				for (auto object : destroyed)
 				{
-					if ((available - head) < count)
+					if ((available - (head - tail)) < count)
 					{
 						break;
+					}
+
+					if ((head - tail) == count)
+					{
+						auto lower = std::lower_bound(std::begin(destroyed), std::end(destroyed), tail);
+						auto upper = std::upper_bound(std::begin(destroyed), std::end(destroyed), head);
+
+						container.insert(std::begin(container), lower, upper);
+						destroyed.erase(lower, upper);
+
+						auto entry = std::upper_bound(std::begin(activated), std::end(activated), tail);
+
+						auto begin = std::begin(container);
+						auto end = std::end(container);
+
+						activated.insert(entry, begin, end);
+						
+						for (auto object : container)
+						{
+							inflate_entity<Segments ... >(object);
+						}
+
+						return bag<entity<Segments ... >>
+						{
+							std::move(container)
+						};
 					}
 
 					if (head != object - 1)
@@ -64,46 +94,15 @@ namespace pronto
 
 					{
 						head = object;
-
-						if ((head - tail) == count)
-						{
-							{
-								auto begin = std::begin(destroyed) + (tail + 0);
-								auto end = std::begin(destroyed) + (head + 1);
-
-								container.insert(std::begin(container), begin, end);
-								destroyed.erase(begin, end);
-
-								for (auto object : container)
-								{
-									inflate_entity<Segments ... >(object);
-								}
-							}
-
-							{
-								auto insertion_point = std::upper_bound(std::begin(activated), std::end(activated), destroyed[tail]);
-
-								auto begin = std::begin(container);
-								auto end = std::end(container);
-
-								activated.insert(insertion_point, begin, end);
-							}
-
-							return bag<entity<Segments ... >>
-							{ 
-								std::begin(container), 
-								std::end(container)
-							};
-						}
 					}
 				}
 			}
 
-			container.resize(count, 0);
+			container.resize(count);
 
 			for (auto & object : container)
 			{
-				auto index = static_cast<type::index_t>(activated.size());
+				auto index = size();
 
 				inflate_entity<Segments ... >(index);
 				activated.emplace_back(index);
@@ -112,8 +111,7 @@ namespace pronto
 
 			return bag<entity<Segments ... >>
 			{ 
-				std::begin(container), 
-				std::end(container) 
+				std::move(container) 
 			};
 		}
 
@@ -129,9 +127,9 @@ namespace pronto
 
 				if (position != end)
 				{
-					auto insertion_point = std::upper_bound(std::begin(destroyed), std::end(destroyed), object);
+					auto entry = std::lower_bound(std::begin(destroyed), std::end(destroyed), object);
 
-					destroyed.insert(insertion_point, object);
+					destroyed.insert(entry, object);
 					activated.erase(position);
 				}
 			}
@@ -140,20 +138,19 @@ namespace pronto
 		template <typename ... Segments>
 		inline void entity_pool<entity<Segments ... >>::destroy(bag<entity<Segments ... >> const & container)
 		{
+			if (valid(container.front()) && valid(container.back()))
 			{
-				auto insertion_point = std::upper_bound(std::begin(destroyed), std::end(destroyed), container.front());
+				auto entry = std::upper_bound(std::begin(destroyed), std::end(destroyed), container.front());
 
 				auto begin = std::begin(container);
 				auto end = std::end(container);
 
-				destroyed.insert(insertion_point, begin, end);
-			}
+				destroyed.insert(entry, begin, end);
 
-			{
-				auto begin = std::lower_bound(std::begin(activated), std::end(activated), container.front());
-				auto end = std::upper_bound(std::begin(activated), std::end(activated), container.back());
+				auto lower = std::lower_bound(std::begin(activated), std::end(activated), container.front());
+				auto upper = std::upper_bound(std::begin(activated), std::end(activated), container.back());
 
-				activated.erase(begin, end);
+				activated.erase(lower, upper);
 			}
 		}
 
@@ -173,7 +170,10 @@ namespace pronto
 		{
 			if (contains(object))
 			{
-				return std::binary_search(std::begin(activated), std::end(activated), object);
+				auto begin = std::begin(activated);
+				auto end = std::end(activated);
+
+				return std::binary_search(begin, end, object);
 			}
 
 			return false;

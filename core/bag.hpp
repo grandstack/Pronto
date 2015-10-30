@@ -16,8 +16,7 @@ namespace pronto
 	{
 		bag() = default;
 
-		template <typename Iterator>
-		bag(Iterator first, Iterator last);
+		bag(std::vector<entity<Segments ... >> && vector);
 
 		bag(bag<entity<Segments ... >> const & other) = delete;
 		bag(bag<entity<Segments ... >> && other) = default;
@@ -26,14 +25,15 @@ namespace pronto
 		bag<entity<Segments ... >> & operator = (bag<entity<Segments ... >> && other) = default;
 
 		type::bool_t contains(entity<Segments ... > const object) const;
-		type::bool_t empty() const;
 
+		type::bool_t empty() const;
 		type::index_t size() const;
 
 		entity<Segments ... > front() const;
 		entity<Segments ... > back() const;
 
 		void reserve(type::index_t const count);
+
 		void clear();
 
 		entity<Segments ... > operator [] (type::index_t const index) const;

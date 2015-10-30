@@ -4,11 +4,9 @@
 namespace pronto
 {
 	template <typename ... Segments>
-	template <typename Iterator>
-	inline bag<entity<Segments ... >>::bag(Iterator first, Iterator last)
+	inline bag<entity<Segments ... >>::bag(std::vector<entity<Segments ... >> && vector)
 	{
-		storage.reserve(std::distance(first, last));
-		storage.insert(std::begin(storage), first, last);
+		storage = std::move(vector);
 	}
 
 	template <typename ... Segments>

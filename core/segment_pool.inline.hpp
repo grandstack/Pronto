@@ -26,6 +26,8 @@ namespace pronto
 		template <typename ... Parameters>
 		inline void segment_pool<entity<Segments ... >, Segment>::create(bag<entity<Segments ... >> const & container, Parameters const & ... arguments)
 		{
+			segments.reserve(container.size() * 1.5);
+
 			for (auto object : container)
 			{
 				if (object >= size())
