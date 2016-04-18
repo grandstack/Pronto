@@ -9,22 +9,10 @@
 namespace pronto
 {
 	template <typename Entity>
-	Entity create();
+	range<Entity> create(type::index_t const count);
 
 	template <typename Entity>
-	bag<Entity> create(type::index_t const count);
-
-	template <typename Entity>
-	void destroy(Entity const object);
-
-	template <typename Entity>
-	void destroy(bag<Entity> const & container);
-
-	template <typename Entity>
-	bool validate(Entity const object);
-
-	template <typename Entity>
-	bool validate(bag<Entity> const & container);
+	void destroy(range<Entity> const & range);
 }
 
 #include "factory.inline.hpp"

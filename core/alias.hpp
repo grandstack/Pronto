@@ -11,11 +11,17 @@ namespace pronto
 		template <typename Type>
 		using pointer_t = Type(*);
 
+		// ----------------------------------------->
+
 		using unsigned_t = unsigned;
 		using signed_t = signed;
 		using bool_t = bool;
 
-		using index_t = unsigned;
+		// ----------------------------------------->
+
+		using index_t = unsigned_t;
+
+		// ----------------------------------------->
 
 		namespace atomic
 		{
@@ -28,6 +34,11 @@ namespace pronto
 
 			using index_t = std::atomic<type::index_t>;
 		}
+	}
+
+	namespace value
+	{
+		constexpr auto invalid = static_cast<type::index_t>(0) - 1;
 	}
 }
 

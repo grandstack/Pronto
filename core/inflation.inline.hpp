@@ -7,56 +7,25 @@ namespace pronto
 	{
 		namespace detail
 		{
-			template <typename Current, typename Next, typename ... Rest, typename ... Segments>
-			inline void inflate_entity(entity<Segments ... > const object)
-			{
-				detail::inflate_entity<Next, Rest ... >(object);
-				detail::inflate_entity<Current>(object);
-			}
-
 			template <typename Current, typename ... Segments>
-			inline void inflate_entity(entity<Segments ... > const object)
+			inline void inflate_entity(range<entity<Segments ... >> const & range)
 			{
 				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
-				pool.create(object);
+				pool.create(range);
 			}
 
 			template <typename Current, typename Next, typename ... Rest, typename ... Segments>
-			inline void inflate_entity(bag<entity<Segments ... >> const & container)
+			inline void inflate_entity(range<entity<Segments ... >> const & range)
 			{
-				detail::inflate_entity<Next, Rest ... >(container);
-				detail::inflate_entity<Current>(container);
-			}
-
-			template <typename Current, typename ... Segments>
-			inline void inflate_entity(bag<entity<Segments ... >> const & container)
-			{
-				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
-				pool.create(container);
+				detail::inflate_entity<Next, Rest ... >(range);
+				detail::inflate_entity<Current>(range);
 			}
 		}
 
 		template <typename ... Segments>
-		inline void inflate_entity(entity<Segments ... > const object)
+		inline void inflate_entity(range<entity<Segments ... >> const & range)
 		{
-			thread_local auto & pool = segment_context<entity<Segments ... >, entity<Segments ... >>::get_pool();
-
-			detail::inflate_entity<Segments ... >(object);
-
-			pool.create(object, object);
-		}
-
-		template <typename ... Segments>
-		inline void inflate_entity(bag<entity<Segments ... >> const & container)
-		{
-			thread_local auto & pool = segment_context<entity<Segments ... >, entity<Segments ... >>::get_pool();
-
-			detail::inflate_entity<Segments ... >(container);
-
-			for (auto object : container)
-			{
-				pool.create(object, object);
-			}
+			detail::inflate_entity<Segments ... >(range);
 		}
 	}
 }

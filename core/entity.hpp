@@ -18,10 +18,7 @@ namespace pronto
 
 	private:
 
-		type::index_t index
-		{
-			static_cast<type::index_t>(0) - 1
-		};
+		type::index_t index = value::invalid;
 	};
 }
 

@@ -7,28 +7,11 @@ namespace pronto
 	{
 		template <typename Segment, typename ... Segments>
 		template <typename ... Parameters>
-		inline void segment_pool<entity<Segments ... >, Segment>::create(entity<Segments ... > object, Parameters const & ... arguments)
+		inline void segment_pool<entity<Segments ... >, Segment>::create(range<entity<Segments ... >> const & range, Parameters const & ... arguments)
 		{
-			if (object >= size())
-			{
-				segments.emplace_back(arguments ...);
-			}
+			segments.reserve(static_cast<std::size_t>(range.length() * 1.5));
 
-			else
-
-				segments[object] = Segment
-			{
-				arguments ...
-			};
-		}
-
-		template <typename Segment, typename ... Segments>
-		template <typename ... Parameters>
-		inline void segment_pool<entity<Segments ... >, Segment>::create(bag<entity<Segments ... >> const & container, Parameters const & ... arguments)
-		{
-			segments.reserve(container.size() * 1.5);
-
-			for (auto object : container)
+			for (auto object : range)
 			{
 				if (object >= size())
 				{
@@ -47,7 +30,7 @@ namespace pronto
 		}
 
 		template <typename Segment, typename ... Segments>
-		inline Segment & segment_pool<entity<Segments ... >, Segment>::operator [] (entity<Segments ... > const object)
+		inline Segment & segment_pool<entity<Segments ... >, Segment>::operator [] (type::index_t const object)
 		{
 			return segments[object];
 		}

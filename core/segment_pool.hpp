@@ -2,8 +2,7 @@
 #define pronto_segment_pool_header
 
 #include "segment_context.hpp"
-#include "entity.hpp"
-#include "bag.hpp"
+#include "range.hpp"
 
 #include <functional>
 #include <utility>
@@ -23,12 +22,9 @@ namespace pronto
 			using value_type = Segment;
 
 			template <typename ... Parameters>
-			void create(entity<Segments ... >, Parameters const & ... arguments);
+			void create(range<entity<Segments ... >> const & range, Parameters const & ... arguments);
 
-			template <typename ... Parameters>
-			void create(bag<entity<Segments ... >> const &, Parameters const & ... arguments);
-
-			Segment & operator [] (entity<Segments ... > const object);
+			Segment & operator [] (type::index_t const object);
 
 			type::index_t size() const;
 

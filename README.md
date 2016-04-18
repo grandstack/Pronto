@@ -19,6 +19,9 @@ auto main() -> int
 				h.eat(f)
 			});
 		});
+
+		pronto::destroy(bulldogs);
+		pronto::destroy(people);
 	});
 }
 ```

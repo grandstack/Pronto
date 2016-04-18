@@ -6,195 +6,67 @@ namespace pronto
 	namespace internal
 	{
 		template <typename ... Segments>
-		inline entity<Segments ... > entity_pool<entity<Segments ... >>::create()
+		inline range<entity<Segments ... >> entity_pool<entity<Segments ... >>::create(type::index_t const count)
 		{
-			if (destroyed.empty())
+			if (!destroyed.empty())
 			{
-				auto entity_index = size();
+				auto recycled = destroyed.front();
 
-				inflate_entity<Segments ... >(entity_index);
-				activated.emplace_back(entity_index);
-
-				return back;
-			}
-
-			auto back = destroyed.back();
-			destroyed.pop_back();
-
-			auto entry = std::lower_bound(std::begin(activated), std::end(activated), back);
-
-			inflate_entity<Segments ... >(back);
-			activated.insert(entry, back);
-
-			return back;
-		}
-
-		template <typename ... Segments>
-		inline bag<entity<Segments ... >> entity_pool<entity<Segments ... >>::create(type::index_t const count)
-		{
-			auto container = std::vector<entity<Segments ... >>
-			{
-				// ...
-			};
-
-			if ((activated.capacity() - activated.size()) < count)
-			{
-				activated.reserve(((activated.size() + 1) / 2) + count);
-			} 
-			
-			container.reserve(count);
-
-			auto available = destroyed.size();
-
-			if (available > count)
-			{
-				auto head = destroyed.front();
-				auto tail = destroyed.front();
-
-				for (auto object : destroyed)
+				for (auto & object : destroyed)
 				{
-					if ((available - (head - tail)) < count)
+					if (recycled.length() >= count)
 					{
-						break;
-					}
+						auto remaining = take_last(recycled, recycled.length() - count);
+						auto result = take_first(recycled, count);
 
-					if ((head - tail) == count)
-					{
-						auto lower = std::lower_bound(std::begin(destroyed), std::end(destroyed), tail);
-						auto upper = std::upper_bound(std::begin(destroyed), std::end(destroyed), head);
-
-						container.insert(std::begin(container), lower, upper);
-						destroyed.erase(lower, upper);
-
-						auto entry = std::upper_bound(std::begin(activated), std::end(activated), tail);
-
-						auto begin = std::begin(container);
-						auto end = std::end(container);
-
-						activated.insert(entry, begin, end);
-						
-						for (auto object : container)
+						destroyed.erase(std::remove_if(std::begin(destroyed), std::end(destroyed), [&] (auto & entry)
 						{
-							inflate_entity<Segments ... >(object);
+							return intersects(recycled, result);
+						}), std::end(destroyed));
+
+						activated.insert(std::upper_bound(std::begin(activated), std::end(activated), result), result);
+
+						if (remaining.empty())
+						{
+							return result;
 						}
 
-						return bag<entity<Segments ... >>
-						{
-							std::move(container)
-						};
+						destroyed.insert(std::upper_bound(std::begin(destroyed), std::end(destroyed), remaining), remaining);
+
+						return result;
 					}
 
-					if (head != object - 1)
+					if ((recycled.back() + 1) != object.front())
 					{
-						head = object;
-						tail = object;
+						recycled = object;
+
+						continue;
 					}
 
-					else
-
-					{
-						head = object;
-					}
+					recycled = join(recycled, object);
 				}
 			}
 
-			container.resize(count);
+			auto one = activated.empty() ? 0 : activated.back().back() + 1;
+			auto two = destroyed.empty() ? 0 : destroyed.back().back() + 1;
 
-			for (auto & object : container)
-			{
-				auto index = size();
+			activated.emplace_back(std::max(one, two), count);
 
-				inflate_entity<Segments ... >(index);
-				activated.emplace_back(index);
-				object = index;
-			}
-
-			return bag<entity<Segments ... >>
-			{ 
-				std::move(container) 
-			};
+			return activated.back();
 		}
 
 		template <typename ... Segments>
-		inline void entity_pool<entity<Segments ... >>::destroy(entity<Segments ... > const object)
+		inline void entity_pool<entity<Segments ... >>::destroy(range<entity<Segments ... >> const & range)
 		{
-			if (valid(object))
+			activated.erase(std::remove_if(std::begin(activated), std::end(activated), [&](auto const & entry)
 			{
-				auto begin = std::begin(activated);
-				auto end = std::end(activated);
-
-				auto position = std::find(begin, end, object);
-
-				if (position != end)
+				if (intersects(range, entry))
 				{
-					auto entry = std::lower_bound(std::begin(destroyed), std::end(destroyed), object);
+					destroyed.insert(std::upper_bound(std::begin(destroyed), std::end(destroyed), entry), entry);
 
-					destroyed.insert(entry, object);
-					activated.erase(position);
-				}
-			}
-		}
-
-		template <typename ... Segments>
-		inline void entity_pool<entity<Segments ... >>::destroy(bag<entity<Segments ... >> const & container)
-		{
-			if (valid(container.front()) && valid(container.back()))
-			{
-				auto entry = std::upper_bound(std::begin(destroyed), std::end(destroyed), container.front());
-
-				auto begin = std::begin(container);
-				auto end = std::end(container);
-
-				destroyed.insert(entry, begin, end);
-
-				auto lower = std::lower_bound(std::begin(activated), std::end(activated), container.front());
-				auto upper = std::upper_bound(std::begin(activated), std::end(activated), container.back());
-
-				activated.erase(lower, upper);
-			}
-		}
-
-		template <typename ... Segments>
-		inline bool entity_pool<entity<Segments ... >>::contains(entity<Segments ... > const object) const
-		{
-			if (object < (activated.size() + destroyed.size()))
-			{
-				return true;
-			}
-
-			return false;
-		}
-
-		template <typename ... Segments>
-		inline bool entity_pool<entity<Segments ... >>::valid(entity<Segments ... > const object) const
-		{
-			if (contains(object))
-			{
-				auto begin = std::begin(activated);
-				auto end = std::end(activated);
-
-				return std::binary_search(begin, end, object);
-			}
-
-			return false;
-		}
-
-		template <typename ... Segments>
-		inline type::index_t entity_pool<entity<Segments ... >>::size() const
-		{
-			return static_cast<type::index_t>(activated.size() + destroyed.size());
-		}
-
-		template <typename ... Segments>
-		inline type::index_t entity_pool<entity<Segments ... >>::size_activated() const
-		{
-			return static_cast<type::index_t>(activated.size());
-		}
-
-		template <typename ... Segments>
-		inline type::index_t entity_pool<entity<Segments ... >>::size_destroyed() const
-		{
-			return static_cast<type::index_t>(destroyed.size());
+					return true;
+				} return false;
+			}), std::end(activated));
 		}
 	}
 }

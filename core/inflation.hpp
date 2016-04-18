@@ -3,7 +3,7 @@
 
 #include "segment_context.hpp"
 #include "entity_context.hpp"
-#include "bag.hpp"
+#include "range.hpp"
 
 namespace pronto
 {
@@ -11,24 +11,15 @@ namespace pronto
 	{
 		namespace detail
 		{
-			template <typename Current, typename Next, typename ... Rest, typename ... Pack>
-			void inflate_entity(entity<Pack ... > const object);
+			template <typename Current, typename ... Segments>
+			void inflate_entity(range<entity<Segments ... >> const & range);
 
-			template <typename Current, typename ... Pack>
-			void inflate_entity(entity<Pack ... > const object);
-
-			template <typename Current, typename Next, typename ... Rest, typename ... Pack>
-			void inflate_entity(bag<entity<Pack ... >> const & container);
-
-			template <typename Current, typename ... Pack>
-			void inflate_entity(bag<entity<Pack ... >> const & container);
+			template <typename Current, typename Next, typename ... Rest, typename ... Segments>
+			void inflate_entity(range<entity<Segments ... >> const & range);
 		}
 
-		template <typename ... Pack>
-		void inflate_entity(entity<Pack ... > const object);
-
-		template <typename ... Pack>
-		void inflate_entity(bag<entity<Pack ... >> const & container);
+		template <typename ... Segments>
+		void inflate_entity(range<entity<Segments ... >> const & range);
 	}
 }
 

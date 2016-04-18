@@ -4,7 +4,7 @@
 #include "segment_context.hpp"
 #include "inflation.hpp"
 #include "utility.hpp"
-#include "bag.hpp"
+#include "range.hpp"
 
 #include <algorithm>
 
@@ -20,28 +20,18 @@ namespace pronto
 		{
 			using value_type = entity<Segments ... >;
 
-			entity<Segments ... > create();
-			bag<entity<Segments ... >> create(type::index_t const count);
+			range<entity<Segments ... >> create(type::index_t const count);
 
-			void destroy(entity<Segments ... > const object);
-			void destroy(bag<entity<Segments ... >> const & container);
-
-			type::bool_t contains(entity<Segments ... > const object) const;
-			type::bool_t valid(entity<Segments ... > const object) const;
-
-			type::index_t size() const;
-
-			type::index_t size_destroyed() const;
-			type::index_t size_activated() const;
+			void destroy(range<entity<Segments ... >> const & range);
 
 		private:
 
-			std::vector<entity<Segments ... >> activated
+			std::vector<range<entity<Segments ... >>> activated
 			{
 				// ...
 			};
 
-			std::vector<entity<Segments ... >> destroyed
+			std::vector<range<entity<Segments ... >>> destroyed
 			{
 				// ...
 			};
