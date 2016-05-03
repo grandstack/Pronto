@@ -3,6 +3,93 @@
 
 namespace pronto
 {
+	namespace internal
+	{
+		namespace detail
+		{
+			template <typename Current, typename ... Source_segments, typename ... Target_segments>
+			inline void move(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
+			{
+				thread_local auto & source_pool = internal::segment_context<entity<Source_segments ... >, Current>::get_pool();
+				thread_local auto & target_pool = internal::segment_context<entity<Target_segments ... >, Current>::get_pool();
+
+				target_pool[target] = std::move(source_pool[source]);
+			}
+
+			template <typename Current, typename Next, typename ... Rest, typename ... Source_segments, typename ... Target_segments>
+			inline void move(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
+			{
+				move<Next, Rest ... >(source, target);
+				move<Current>(source, target);
+			}
+
+			template <typename ... Source_segments, typename ... Target_segments, typename ... Common_segments>
+			inline void move(entity<Source_segments ... > const source, entity<Target_segments ... > const target, utility::type_carrier<Common_segments ... >)
+			{
+				if (utility::type_carrier<Common_segments ... >::size() > 0)
+				{
+					detail::move<Common_segments ... >(source, target);
+				}
+			}
+		}
+
+		template <typename ... Source_segments, typename ... Target_segments>
+		inline void move(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
+		{
+			using common_types = utility::carrier_common_t<utility::type_carrier<Source_segments ... >, utility::type_carrier<Target_segments ... >>;
+
+			constexpr auto common = common_types
+			{
+				// ...
+			};
+
+			detail::move(source, target, common);
+		}
+
+		// ----------------------------------------->
+
+		namespace detail
+		{
+			template <typename Current, typename ... Source_segments, typename ... Target_segments>
+			inline void copy(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
+			{
+				thread_local auto & source_pool = internal::segment_context<entity<Source_segments ... >, Current>::get_pool();
+				thread_local auto & target_pool = internal::segment_context<entity<Target_segments ... >, Current>::get_pool();
+
+				target_pool[target] = source_pool[source];
+			}
+
+			template <typename Current, typename Next, typename ... Rest, typename ... Source_segments, typename ... Target_segments>
+			inline void copy(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
+			{
+				copy<Next, Rest ... >(source, target);
+				copy<Current>(source, target);
+			}
+
+			template <typename ... Source_segments, typename ... Target_segments, typename ... Common_segments>
+			inline void copy(entity<Source_segments ... > const source, entity<Target_segments ... > const target, utility::type_carrier<Common_segments ... >)
+			{
+				if (utility::type_carrier<Common_segments ... >::size() > 0)
+				{
+					detail::copy<Common_segments ... >(source, target);
+				}
+			}
+		}
+
+		template <typename ... Source_segments, typename ... Target_segments>
+		inline void copy(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
+		{
+			using common_types = utility::carrier_common_t<utility::type_carrier<Source_segments ... >, utility::type_carrier<Target_segments ... >>;
+
+			constexpr auto common = common_types
+			{
+				// ...
+			};
+
+			detail::copy(source, target, common);
+		}
+	}
+
 	namespace detail
 	{
 		template <typename Functor, typename ... Segments, typename ... Arguments>
@@ -17,16 +104,11 @@ namespace pronto
 		}
 
 		template <typename Functor, typename ... Segments, typename ... Arguments>
-		inline void process(std::vector<entity<Segments ... >> const & vector, utility::type_carrier<Arguments ... >, Functor && functor)
+		inline void process(entity<Segments ... > const & object, utility::type_carrier<Arguments ... >, Functor && functor)
 		{
-			thread_local auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
+			static auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
 
-			for (auto index : vector)
-			{
-				functor(std::get<internal::segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[index] ... );
-			}
-
-			return true;
+			functor(std::get<internal::segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[object] ... );
 		}
 	}
 
@@ -35,25 +117,77 @@ namespace pronto
 	{
 		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
 
-		auto parameters = utility::parameters_t<Functor>
+		constexpr auto parameters = utility::parameters_t<Functor>
 		{
 			// ...
 		};
 
-		return detail::process(range, parameters, std::forward<Functor>(functor));
+		detail::process(range, parameters, std::forward<Functor>(functor));
 	}
 
 	template <typename Functor, typename ... Segments>
-	inline void process(std::vector<entity<Segments ... >> const & vector, Functor && functor)
+	inline void process(entity<Segments ... > const & object, Functor && functor)
 	{
 		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
 
-		auto parameters = utility::parameters_t<Functor>
+		constexpr auto parameters = utility::parameters_t<Functor>
 		{
 			// ...
 		};
 
-		return detail::process(vector, parameters, std::forward<Functor>(functor));
+		detail::process(object, parameters, std::forward<Functor>(functor));
+	}
+
+	namespace detail
+	{
+		template <typename Functor, typename ... Segments, typename ... Arguments>
+		inline range<entity<Segments ... >> take_and_discard(range<entity<Segments ... >> & range, utility::type_carrier<Arguments ... >, Functor && predicate)
+		{
+			thread_local auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
+
+			thread_local std::vector<entity<Segments ... >> taken
+			{
+				// ...
+			};
+
+			if (range)
+			{
+				for (auto object : range)
+				{
+					if (predicate(std::get<internal::segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[object] ... ))
+					{
+						taken.push_back(object);
+					}
+				}
+
+				auto result = pronto::create<entity<Segments ... >>(static_cast<type::index_t>(taken.size()));
+
+				type::index_t index = 0;
+				for (auto object : taken)
+				{
+					internal::move(object, result[index++]);
+				} taken.clear();
+
+				destroy(range);
+
+				return result;
+			}
+
+			return { 0, 0 };
+		}
+	}
+
+	template <typename Functor, typename ... Segments>
+	inline range<entity<Segments ... >> take_and_discard(range<entity<Segments ... >> & range, Functor && predicate)
+	{
+		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
+
+		constexpr auto parameters = utility::parameters_t<Functor>
+		{
+			// ...
+		};
+
+		return detail::take_and_discard(range, parameters, std::forward<Functor>(predicate));
 	}
 }
 

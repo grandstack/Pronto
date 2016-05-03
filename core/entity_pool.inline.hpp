@@ -56,7 +56,7 @@ namespace pronto
 		}
 
 		template <typename ... Segments>
-		inline void entity_pool<entity<Segments ... >>::destroy(range<entity<Segments ... >> const & range)
+		inline void entity_pool<entity<Segments ... >>::destroy(range<entity<Segments ... >> & range)
 		{
 			activated.erase(std::remove_if(std::begin(activated), std::end(activated), [&](auto const & entry)
 			{
@@ -67,6 +67,8 @@ namespace pronto
 					return true;
 				} return false;
 			}), std::end(activated));
+
+			range = { 0, 0 };
 		}
 	}
 }

@@ -19,20 +19,31 @@ namespace pronto
 		template <typename Segment, typename ... Segments>
 		struct segment_pool <entity<Segments ... >, Segment>
 		{
-			using value_type = Segment;
+			void create(range<entity<Segments ... >> const & range);
+			void destroy(range<entity<Segments ... >> const & range);
 
-			template <typename ... Parameters>
-			void create(range<entity<Segments ... >> const & range, Parameters const & ... arguments);
-
-			Segment & operator [] (type::index_t const object);
-
-			type::index_t size() const;
+			Segment & operator [] (entity<Segments ... > const object);
 
 		private:
 
 			std::vector<Segment> segments
 			{
 				// ...
+			};
+		};
+
+		// ----------------------------------------->
+
+		template <typename ... Segments>
+		struct segment_pool <entity<Segments ... >, entity<Segments ... >>
+		{
+			entity<Segments ... > operator [] (entity<Segments ... > const object);
+
+		private:
+
+			range<entity<Segments ... >> const segments
+			{
+				0, value::infinity
 			};
 		};
 	}

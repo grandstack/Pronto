@@ -18,7 +18,7 @@ namespace pronto
 
 	private:
 
-		type::index_t index = value::invalid;
+		type::index_t index = value::infinity;
 	};
 }
 

@@ -1,22 +1,34 @@
 #ifndef pronto_utility_header
 #define pronto_utility_header
 
+#include "alias.hpp"
+
 #include <tuple>
 
 namespace pronto
 {
 	namespace utility
 	{
-		template <typename ... Pack>
+		template <typename ... Types>
 		struct type_carrier
 		{
-			using carrier_type = type_carrier<Pack ... >;
+			using carrier_type = type_carrier<Types ... >;
+
+			static constexpr type::index_t size()
+			{
+				return static_cast<type::index_t>(sizeof ... (Types));
+			}
 		};
 
 		template <unsigned ... Indices>
 		struct index_carrier
 		{
-			using type = index_carrier<Indices ... >;
+			using carrier_type = index_carrier<Indices ... >;
+
+			static constexpr type::index_t size()
+			{
+				return static_cast<type::index_t>(sizeof ... (Indices));
+			}
 		};
 
 		namespace detail
@@ -78,6 +90,88 @@ namespace pronto
 		{
 			enum : bool { value = detail::index_carrier_contains<index_carrier<Indices ... >, Current>::value && carrier_contains<index_carrier<Indices ... >, index_carrier<Next, Rest ... >>::value };
 		};
+
+		// ----------------------------------------->
+
+		namespace detail
+		{
+			template <bool, typename, typename>
+			struct carrier_conditional;
+
+			template <typename ... Types_one, typename ... Types_two>
+			struct carrier_conditional<true, type_carrier<Types_one ... >, type_carrier<Types_two ... >>
+			{
+				using type = type_carrier<Types_one ... >;
+			};
+
+			template <typename ... Types_one, typename ... Types_two>
+			struct carrier_conditional<false, type_carrier<Types_one ... >, type_carrier<Types_two ... >>
+			{
+				using type = type_carrier<Types_two ... >;
+			};
+
+			template <unsigned ... Indices_one, unsigned ... Indices_two>
+			struct carrier_conditional<true, index_carrier<Indices_one ... >, index_carrier<Indices_two ... >>
+			{
+				using type = index_carrier<Indices_one ... >;
+			};
+
+			template <unsigned ... Indices_one, unsigned ... Indices_two>
+			struct carrier_conditional<false, index_carrier<Indices_one ... >, index_carrier<Indices_two ... >>
+			{
+				using type = index_carrier<Indices_two ... >;
+			};
+		}
+
+		template <bool Conditional, typename Type_one, typename Type_two>
+		using carrier_conditional_t = typename detail::carrier_conditional<Conditional, Type_one, Type_two>::type;
+
+		// ----------------------------------------->
+
+		namespace detail
+		{
+			template <typename, typename, typename = void>
+			struct carrier_common;
+
+			template <typename ... Types_one, typename ... Types_two>
+			struct carrier_common<type_carrier<Types_one ... >, type_carrier<Types_two ... >>
+			{
+				using type = typename detail::carrier_common<type_carrier<Types_one ... >, type_carrier<Types_two ... >, type_carrier<>>::type;
+			};
+
+			template <typename ... Types_one, typename ... Types_two, typename Current>
+			struct carrier_common<type_carrier<Types_one ... >, type_carrier<Current>, type_carrier<Types_two ... >>
+			{
+				using type = carrier_conditional_t<carrier_contains<type_carrier<Types_one ... >, type_carrier<Current>>::value, type_carrier<Current, Types_two ... >, type_carrier<Types_two ... >>; 
+			};
+
+			template <typename ... Types_one, typename ... Types_two, typename Current, typename Next, typename ... Rest>
+			struct carrier_common<type_carrier<Types_one ... >, type_carrier<Current, Next, Rest ... >, type_carrier<Types_two ... >>
+			{
+				using type = typename carrier_common<type_carrier<Types_one ... >, type_carrier<Next, Rest ... >, carrier_conditional_t<carrier_contains<type_carrier<Types_one ... >, type_carrier<Current>>::value, type_carrier<Current, Types_two ... >, type_carrier<Types_two ... >>>::type;
+			};
+
+			template <unsigned ... Indices_one, unsigned ... Indices_two>
+			struct carrier_common<index_carrier<Indices_one ... >, index_carrier<Indices_two ... >>
+			{
+				using type = typename detail::carrier_common<index_carrier<Indices_one ... >, index_carrier<Indices_two ... >, index_carrier<>>::type;
+			};
+
+			template <unsigned ... Indices_one, unsigned ... Indices_two, unsigned Current>
+			struct carrier_common<index_carrier<Indices_one ... >, index_carrier<Current>, index_carrier<Indices_two ... >>
+			{
+				using type = carrier_conditional_t<carrier_contains<index_carrier<Indices_one ... >, index_carrier<Current>>::value, index_carrier<Current, Indices_two ... >, index_carrier<Indices_two ... >>; 
+			};
+
+			template <unsigned ... Indices_one, unsigned ... Indices_two, unsigned Current, unsigned Next, unsigned ... Rest>
+			struct carrier_common<index_carrier<Indices_one ... >, index_carrier<Current, Next, Rest ... >, index_carrier<Indices_two ... >>
+			{
+				using type = typename carrier_common<index_carrier<Indices_one ... >, index_carrier<Next, Rest ... >, carrier_conditional_t<carrier_contains<index_carrier<Indices_one ... >, index_carrier<Current>>::value, index_carrier<Current, Indices_two ... >, index_carrier<Indices_two ... >>>::type;
+			};
+		}
+
+		template <typename Carrier_one, typename Carrier_two>
+		using carrier_common_t = typename detail::carrier_common<Carrier_one, Carrier_two>::type;
 
 		// ----------------------------------------->
 

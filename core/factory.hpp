@@ -12,7 +12,7 @@ namespace pronto
 	range<Entity> create(type::index_t const count);
 
 	template <typename Entity>
-	void destroy(range<Entity> const & range);
+	void destroy(range<Entity> & range);
 }
 
 #include "factory.inline.hpp"

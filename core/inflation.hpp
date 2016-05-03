@@ -20,6 +20,18 @@ namespace pronto
 
 		template <typename ... Segments>
 		void inflate_entity(range<entity<Segments ... >> const & range);
+
+		namespace detail
+		{
+			template <typename Current, typename ... Segments>
+			void deflate_entity(range<entity<Segments ... >> const & range);
+
+			template <typename Current, typename Next, typename ... Rest, typename ... Segments>
+			void deflate_entity(range<entity<Segments ... >> const & range);
+		}
+
+		template <typename ... Segments>
+		void deflate_entity(range<entity<Segments ... >> const & range);
 	}
 }
 

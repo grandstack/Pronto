@@ -38,7 +38,7 @@ namespace pronto
 
 	namespace value
 	{
-		constexpr auto invalid = static_cast<type::index_t>(0) - 1;
+		constexpr auto infinity = static_cast<type::index_t>(0) - 1;
 	}
 }
 

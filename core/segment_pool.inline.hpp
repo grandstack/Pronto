@@ -6,16 +6,15 @@ namespace pronto
 	namespace internal
 	{
 		template <typename Segment, typename ... Segments>
-		template <typename ... Parameters>
-		inline void segment_pool<entity<Segments ... >, Segment>::create(range<entity<Segments ... >> const & range, Parameters const & ... arguments)
+		inline void segment_pool<entity<Segments ... >, Segment>::create(range<entity<Segments ... >> const & range)
 		{
-			segments.reserve(static_cast<std::size_t>(range.length() * 1.5));
+			segments.reserve(static_cast<std::size_t>((segments.size() + range.length()) * 1.5));
 
 			for (auto object : range)
 			{
-				if (object >= size())
+				if (object >= segments.size())
 				{
-					segments.emplace_back(arguments ... );
+					segments.emplace_back();
 				}
 
 				else
@@ -23,22 +22,34 @@ namespace pronto
 				{
 					segments[object] = Segment
 					{
-						arguments ...
+						// ...
 					};
 				}
 			}
 		}
 
 		template <typename Segment, typename ... Segments>
-		inline Segment & segment_pool<entity<Segments ... >, Segment>::operator [] (type::index_t const object)
+		inline void segment_pool<entity<Segments ... >, Segment>::destroy(range<entity<Segments ... >> const & range)
+		{
+			if (segments.size() == range.back())
+			{
+				segments.resize(segments.size() - range.length());
+				segments.shrink_to_fit();
+			}
+		}
+
+		template <typename Segment, typename ... Segments>
+		inline Segment & segment_pool<entity<Segments ... >, Segment>::operator [] (entity<Segments ... > const object)
 		{
 			return segments[object];
 		}
 
-		template <typename Segment, typename ... Segments>
-		inline type::index_t segment_pool<entity<Segments ... >, Segment>::size() const
+		// ----------------------------------------->
+
+		template <typename ... Segments>
+		inline entity<Segments ... > segment_pool<entity<Segments ... >, entity<Segments ... >>::operator [] (entity<Segments ... > const object)
 		{
-			return static_cast<type::index_t>(segments.size());
+			return segments[object];
 		}
 	}
 }

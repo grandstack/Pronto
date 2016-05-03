@@ -96,7 +96,13 @@ namespace pronto
 	}
 
 	template <typename ... Segments>
-	inline type::index_t range<entity<Segments ... >>::operator [] (type::index_t const index) const noexcept
+	inline range<entity<Segments ... >>::operator type::bool_t () const
+	{
+		return length() > 0;
+	}
+
+	template <typename ... Segments>
+	inline entity<Segments ... > range<entity<Segments ... >>::operator [] (type::index_t const index) const noexcept
 	{
 		return (index % ((back() - front()) + 1)) + front();
 	}

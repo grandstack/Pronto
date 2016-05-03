@@ -22,7 +22,7 @@ namespace pronto
 
 			range<entity<Segments ... >> create(type::index_t const count);
 
-			void destroy(range<entity<Segments ... >> const & range);
+			void destroy(range<entity<Segments ... >> & range);
 
 		private:
 

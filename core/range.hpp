@@ -52,7 +52,9 @@ namespace pronto
 		detail::range_iterator<entity<Segments ... >> begin() const noexcept;
 		detail::range_iterator<entity<Segments ... >> end() const noexcept;
 
-		type::index_t operator [] (type::index_t const index) const noexcept;
+		operator type::bool_t () const;
+
+		entity<Segments ... > operator [] (type::index_t const index) const noexcept;
 
 		type::bool_t operator < (range<entity<Segments ... >> const & other) const noexcept;
 		type::bool_t operator > (range<entity<Segments ... >> const & other) const noexcept;
