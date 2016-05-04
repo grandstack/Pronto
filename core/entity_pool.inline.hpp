@@ -16,12 +16,12 @@ namespace pronto
 				{
 					if (recycled.length() >= count)
 					{
-						auto remaining = take_last(recycled, recycled.length() - count);
-						auto result = take_first(recycled, count);
+						auto remaining = utility::take_last(recycled, recycled.length() - count);
+						auto result = utility::take_first(recycled, count);
 
 						destroyed.erase(std::remove_if(std::begin(destroyed), std::end(destroyed), [&] (auto & entry)
 						{
-							return intersects(recycled, result);
+							return utility::intersects(recycled, result);
 						}), std::end(destroyed));
 
 						activated.insert(std::upper_bound(std::begin(activated), std::end(activated), result), result);
@@ -43,7 +43,7 @@ namespace pronto
 						continue;
 					}
 
-					recycled = join(recycled, object);
+					recycled = utility::join(recycled, object);
 				}
 			}
 
@@ -60,7 +60,7 @@ namespace pronto
 		{
 			activated.erase(std::remove_if(std::begin(activated), std::end(activated), [&](auto const & entry)
 			{
-				if (intersects(range, entry))
+				if (utility::intersects(range, entry))
 				{
 					destroyed.insert(std::upper_bound(std::begin(destroyed), std::end(destroyed), entry), entry);
 

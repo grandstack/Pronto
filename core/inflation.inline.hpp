@@ -10,7 +10,7 @@ namespace pronto
 			template <typename Current, typename ... Segments>
 			inline void inflate_entity(range<entity<Segments ... >> const & range)
 			{
-				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
+				auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
 
 				pool.create(range);
 			}
@@ -37,7 +37,7 @@ namespace pronto
 			template <typename Current, typename ... Segments>
 			inline void deflate_entity(range<entity<Segments ... >> const & range)
 			{
-				thread_local auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
+				auto & pool = segment_context<entity<Segments ... >, Current>::get_pool();
 
 				pool.destroy(range);
 			}

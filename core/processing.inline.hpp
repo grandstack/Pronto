@@ -3,15 +3,15 @@
 
 namespace pronto
 {
-	namespace internal
+	namespace utility
 	{
 		namespace detail
 		{
 			template <typename Current, typename ... Source_segments, typename ... Target_segments>
 			inline void move(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
 			{
-				thread_local auto & source_pool = internal::segment_context<entity<Source_segments ... >, Current>::get_pool();
-				thread_local auto & target_pool = internal::segment_context<entity<Target_segments ... >, Current>::get_pool();
+				auto & source_pool = internal::segment_context<entity<Source_segments ... >, Current>::get_pool();
+				auto & target_pool = internal::segment_context<entity<Target_segments ... >, Current>::get_pool();
 
 				target_pool[target] = std::move(source_pool[source]);
 			}
@@ -53,8 +53,8 @@ namespace pronto
 			template <typename Current, typename ... Source_segments, typename ... Target_segments>
 			inline void copy(entity<Source_segments ... > const source, entity<Target_segments ... > const target)
 			{
-				thread_local auto & source_pool = internal::segment_context<entity<Source_segments ... >, Current>::get_pool();
-				thread_local auto & target_pool = internal::segment_context<entity<Target_segments ... >, Current>::get_pool();
+				auto & source_pool = internal::segment_context<entity<Source_segments ... >, Current>::get_pool();
+				auto & target_pool = internal::segment_context<entity<Target_segments ... >, Current>::get_pool();
 
 				target_pool[target] = source_pool[source];
 			}
@@ -95,7 +95,7 @@ namespace pronto
 		template <typename Functor, typename ... Segments, typename ... Arguments>
 		inline void process(range<entity<Segments ... >> const & range, utility::type_carrier<Arguments ... >, Functor && functor)
 		{
-			thread_local auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
+			auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
 
 			for (auto index : range)
 			{
@@ -106,7 +106,7 @@ namespace pronto
 		template <typename Functor, typename ... Segments, typename ... Arguments>
 		inline void process(entity<Segments ... > const & object, utility::type_carrier<Arguments ... >, Functor && functor)
 		{
-			static auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
+			auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
 
 			functor(std::get<internal::segment_pool<entity<Segments ... >, Arguments>(&)>(pools)[object] ... );
 		}
@@ -138,12 +138,14 @@ namespace pronto
 		detail::process(object, parameters, std::forward<Functor>(functor));
 	}
 
+	// ----------------------------------------->
+
 	namespace detail
 	{
 		template <typename Functor, typename ... Segments, typename ... Arguments>
-		inline range<entity<Segments ... >> take_and_discard(range<entity<Segments ... >> & range, utility::type_carrier<Arguments ... >, Functor && predicate)
+		inline range<entity<Segments ... >> take_if(range<entity<Segments ... >> & range, utility::type_carrier<Arguments ... >, Functor && predicate)
 		{
-			thread_local auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
+			auto pools = std::tie(internal::segment_context<entity<Segments ... >, Arguments>::get_pool() ... );
 
 			thread_local std::vector<entity<Segments ... >> taken
 			{
@@ -162,13 +164,11 @@ namespace pronto
 
 				auto result = pronto::create<entity<Segments ... >>(static_cast<type::index_t>(taken.size()));
 
-				type::index_t index = 0;
+				auto index = 0;
 				for (auto object : taken)
 				{
-					internal::move(object, result[index++]);
+					utility::move(object, result[index++]);
 				} taken.clear();
-
-				destroy(range);
 
 				return result;
 			}
@@ -178,7 +178,7 @@ namespace pronto
 	}
 
 	template <typename Functor, typename ... Segments>
-	inline range<entity<Segments ... >> take_and_discard(range<entity<Segments ... >> & range, Functor && predicate)
+	inline range<entity<Segments ... >> take_if(range<entity<Segments ... >> & range, Functor && predicate)
 	{
 		static_assert(utility::carrier_contains<utility::type_carrier<entity<Segments ... >, Segments ... >, utility::parameters_t<Functor>>::value, "This entity does not contain one or more of these segments!");
 
@@ -187,7 +187,7 @@ namespace pronto
 			// ...
 		};
 
-		return detail::take_and_discard(range, parameters, std::forward<Functor>(predicate));
+		return detail::take_if(range, parameters, std::forward<Functor>(predicate));
 	}
 }
 

@@ -3,10 +3,10 @@
 
 namespace pronto
 {
-	template <typename Entity>
-	inline range<Entity> create(type::index_t const count)
+	template <typename Type>
+	inline range<Type> create(type::index_t const count)
 	{
-		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
+		auto & pool = internal::entity_context<Type>::get_pool();
 
 		auto entities = pool.create(count);
 		internal::inflate_entity(entities);
@@ -14,10 +14,10 @@ namespace pronto
 		return entities;
 	}
 
-	template <typename Entity>
-	inline void destroy(range<Entity> & range)
+	template <typename Type>
+	inline void destroy(range<Type> & range)
 	{
-		thread_local auto & pool = internal::entity_context<Entity>::get_pool();
+		auto & pool = internal::entity_context<Type>::get_pool();
 
 		if (range)
 		{

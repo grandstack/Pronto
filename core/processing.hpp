@@ -7,7 +7,7 @@
 
 namespace pronto
 {
-	namespace internal
+	namespace utility
 	{
 		namespace detail
 		{
@@ -60,13 +60,13 @@ namespace pronto
 	namespace detail
 	{
 		template <typename Functor, typename ... Segments, typename ... Arguments>
-		range<entity<Segments ... >> take_and_discard(range<entity<Segments ... >> & range, utility::type_carrier<Arguments ... >, Functor && predicate);
+		range<entity<Segments ... >> take_if(range<entity<Segments ... >> & range, utility::type_carrier<Arguments ... >, Functor && predicate);
 	}
 
 	template <typename Functor, typename ... Segments>
-	range<entity<Segments ... >> take_and_discard(range<entity<Segments ... >> & range, Functor && predicate);
+	range<entity<Segments ... >> take_if(range<entity<Segments ... >> & range, Functor && predicate);
 }
 
-#include "process.inline.hpp"
+#include "processing.inline.hpp"
 
 #endif

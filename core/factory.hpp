@@ -4,15 +4,15 @@
 #include "segment_context.hpp"
 #include "entity_context.hpp"
 #include "synchronizer.hpp"
-#include "process.hpp"
+#include "processing.hpp"
 
 namespace pronto
 {
-	template <typename Entity>
-	range<Entity> create(type::index_t const count);
+	template <typename Type>
+	range<Type> create(type::index_t const count);
 
-	template <typename Entity>
-	void destroy(range<Entity> & range);
+	template <typename Type>
+	void destroy(range<Type> & range);
 }
 
 #include "factory.inline.hpp"
